@@ -1,0 +1,38 @@
+services:
+  app:
+    container_name: 'my-user-service'
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - DATABASE_HOST=database
+      - DATABASE_PORT=27017
+      # - SERVICE_PORT=3000
+      - TAG=${TAG}
+    ports:
+      - 3001:3000
+    working_dir: /app
+    networks:
+      - my-user-service
+    links:
+      - database
+  database:
+    image: mongo
+    container_name: 'my-user-db'
+    restart: unless-stopped
+    volumes:
+      - database-data:/data/db
+
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${DATABASE_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${DATABASE_PASSWORD}
+    ports:
+      - '27020:27017'
+    networks:
+      - my-user-service
+networks:
+  my-user-service:
+volumes:
+  database-data:
