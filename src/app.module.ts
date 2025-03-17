@@ -9,7 +9,13 @@ import { User, UserSchema } from './schemas/user.schema';
 
 @Module({
   imports: [
-    MongooseModule.forRoot(mongodbConfig.uri),
+    MongooseModule.forRoot(mongodbConfig.uri, {
+      authSource: 'admin',
+      auth: {
+        username: mongodbConfig.user,
+        password: mongodbConfig.password,
+      },
+    }),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
   ],
   controllers: [AppController],
