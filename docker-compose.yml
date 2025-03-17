@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  user-service:
+    build: . # Builds the service from the Dockerfile in the current directory
+    ports:
+      - '${PORT}:${PORT}' # Maps port 6001 on the host to port 6001 in the container from .env
+    env_file:
+      - .env # Loads environment variables from the .env file
+    depends_on:
+      - mongodb # Ensures MongoDB starts before user-service
+    networks:
+      - user-network # Connects to the user-network for internal communication
+
+  mongodb:
+    image: mongo:latest # Uses the latest official MongoDB image
+    ports:
+      - '27016:${MONGODB_PORT}' # Maps port 27016 on the host to port 27017 in the container
+    environment:
+      - PORT=${PORT} # Sets the application port from .env
+      - MONGO_INITDB_ROOT_USERNAME=${MONGODB_USER} # Sets the MongoDB root username from .env
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGODB_PASSWORD} # Sets the MongoDB root password from .env
+      - MONGO_INITDB_DATABASE=${MONGODB_DB_NAME} # Initializes the default database from .env
+    volumes:
+      - mongodb_data:/data/db # Persists MongoDB data even after container restarts
+    networks:
+      - user-network # Connects to the user-network for internal communication
+
+networks:
+  user-network:
+    driver: bridge # Creates an isolated bridge network for secure communication between services
+
+volumes:
+  mongodb_data: # Named volume to persist MongoDB data
